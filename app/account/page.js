@@ -23,12 +23,16 @@ export default function AccountPage() {
       setUser(user);
       setNewEmail(user.email || '');
       
-      // Interroge directement la base de données Supabase
-      const { data: profile } = await supabase
+      // Interroge directement la base de données Supabase avec gestion d'erreur
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('is_premium')
         .eq('id', user.id)
         .single();
+
+      if (error) {
+        console.error("Erreur Supabase (vérifie les politiques RLS) :", error.message);
+      }
 
       setIsPremium(profile?.is_premium || false);
       setLoading(false);
