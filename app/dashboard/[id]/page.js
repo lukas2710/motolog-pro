@@ -3,6 +3,7 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../supabase';
+
 export default function MotoDetailPage({ params }) {
   const resolvedParams = use(params);
   const motoId = resolvedParams.id;
@@ -15,6 +16,7 @@ export default function MotoDetailPage({ params }) {
 
   const [showLogModal, setShowLogModal] = useState(false);
   const [showPartModal, setShowPartModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const [logTitle, setLogTitle] = useState('');
   const [logHours, setLogHours] = useState('');
@@ -96,6 +98,16 @@ export default function MotoDetailPage({ params }) {
 
   const handleAddPart = async (e) => {
     e.preventDefault();
+
+    const isPremium = localStorage.getItem("is_premium") === "true";
+    const MAX_FREE_PARTS = 5;
+
+    if (!isPremium && parts.length >= MAX_FREE_PARTS) {
+      setShowPartModal(false);
+      setShowUpgradeModal(true);
+      return;
+    }
+
     setSubmitting(true);
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -367,6 +379,36 @@ export default function MotoDetailPage({ params }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Upgrade / Limite atteinte */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-[#111114] border border-orange-500/40 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl text-center">
+            <span className="text-[10px] font-mono font-bold tracking-widest text-orange-500 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full uppercase">
+              VERSION GRATUITE LIMITÉE
+            </span>
+            <h3 className="text-lg font-black text-white tracking-tight">Passez à la vitesse supérieure</h3>
+            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+              Vous avez atteint la limite de 5 entretiens sur cette moto. Débloquez l'accès illimité à vie pour toutes vos motos et entretiens.
+            </p>
+            <div className="pt-2 flex flex-col gap-2">
+              <Link
+                href="/upgrade"
+                className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-black font-mono text-xs font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20"
+              >
+                DÉCOUVRIR L'ILLIMITÉ
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(false)}
+                className="w-full py-2 bg-zinc-900 text-zinc-400 hover:text-white font-mono text-xs rounded-xl transition-colors"
+              >
+                Plus tard
+              </button>
+            </div>
           </div>
         </div>
       )}
