@@ -10,12 +10,11 @@ export default function SuccessPage() {
     const activatePremium = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Enregistre le statut dans le cloud Supabase lié à l'e-mail du compte
-        await supabase.auth.updateUser({
-          data: { is_premium: true }
-        });
+        await supabase
+          .from('profiles')
+          .update({ is_premium: true })
+          .eq('id', user.id);
       }
-      localStorage.setItem("is_premium", "true");
     };
 
     activatePremium();
