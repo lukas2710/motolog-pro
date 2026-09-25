@@ -27,13 +27,13 @@ export default function BottomNav() {
   const homeLink = activeMotoId ? `/dashboard/${activeMotoId}` : '/dashboard';
   const maintenanceLink = activeMotoId ? `/dashboard/${activeMotoId}/maintenance` : '/dashboard';
   const costsLink = activeMotoId ? `/dashboard/${activeMotoId}/costs` : '/dashboard';
-  const vehiculesLink = '/dashboard';
+  const accountLink = '/account';
 
   // Détection de la page active
   const isAccueilActive = activeMotoId && pathname === `/dashboard/${activeMotoId}`;
   const isMaintenanceActive = pathname.includes('/maintenance');
   const isCostsActive = pathname.includes('/costs');
-  const isVehiculesActive = pathname === '/dashboard';
+  const isAccountActive = pathname === '/account' || pathname === '/dashboard';
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-[#0c0c0e]/95 backdrop-blur-md border-t border-zinc-800/80 z-[9999] px-3 py-2">
@@ -50,7 +50,7 @@ export default function BottomNav() {
           <span className="text-[10px] md:text-xs tracking-tight mt-0.5 uppercase">Accueil</span>
         </Link>
 
-        {/* ENTRETIEN (Page dédiée) */}
+        {/* ENTRETIEN */}
         <Link
           href={maintenanceLink}
           className={`flex flex-col items-center justify-center min-w-[55px] py-1 transition-all ${
@@ -61,7 +61,7 @@ export default function BottomNav() {
           <span className="text-[10px] md:text-xs tracking-tight mt-0.5 uppercase">Entretien</span>
         </Link>
 
-        {/* DÉPENSES (Page dédiée) */}
+        {/* DÉPENSES */}
         <Link
           href={costsLink}
           className={`flex flex-col items-center justify-center min-w-[55px] py-1 transition-all ${
@@ -72,21 +72,12 @@ export default function BottomNav() {
           <span className="text-[10px] md:text-xs tracking-tight mt-0.5 uppercase">Dépenses</span>
         </Link>
 
-        {/* VÉHICULES */}
+        {/* MON COMPTE & VÉHICULES FUSIONNÉS */}
         <Link
-          href={vehiculesLink}
+          href={accountLink}
           className={`flex flex-col items-center justify-center min-w-[55px] py-1 transition-all ${
-            isVehiculesActive ? 'text-orange-500 font-bold scale-105' : 'text-zinc-500 hover:text-zinc-300'
+            isAccountActive ? 'text-orange-500 font-bold scale-105' : 'text-zinc-500 hover:text-zinc-300'
           }`}
-        >
-          <span className="text-xl md:text-2xl">🏍️</span>
-          <span className="text-[10px] md:text-xs tracking-tight mt-0.5 uppercase">Véhicules</span>
-        </Link>
-
-        {/* MON COMPTE */}
-        <Link
-          href="/dashboard"
-          className="flex flex-col items-center justify-center min-w-[55px] py-1 text-zinc-500 hover:text-zinc-300 transition-all"
         >
           <span className="text-xl md:text-2xl">👤</span>
           <span className="text-[10px] md:text-xs tracking-tight mt-0.5 uppercase">Compte</span>
