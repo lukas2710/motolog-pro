@@ -23,8 +23,17 @@ export default function AccountPage() {
       setUser(user);
       setNewEmail(user.email || '');
       
-      const premiumStatus = localStorage.getItem("is_premium") === "true";
+      // Vérifie directement dans le compte Supabase (cloud) via user_metadata
+      const cloudPremium = user.user_metadata?.is_premium === true;
+      const localPremium = localStorage.getItem("is_premium") === "true";
+
+      const premiumStatus = cloudPremium || localPremium;
       setIsPremium(premiumStatus);
+      
+      if (cloudPremium && !localPremium) {
+        localStorage.setItem("is_premium", "true");
+      }
+
       setLoading(false);
     }
     loadUser();
@@ -148,6 +157,7 @@ export default function AccountPage() {
           <button
             onClick={async () => {
               await supabase.auth.signOut();
+              localStorage.removeItem("is_premium");
               router.push('/');
             }}
             className="w-full py-3 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-mono text-xs font-bold rounded-xl transition-all"
