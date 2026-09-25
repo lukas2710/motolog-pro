@@ -3,9 +3,9 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../supabase';
-
 export default function MotoDetailPage({ params }) {
-  const { id: motoId } = use(params);
+  const resolvedParams = use(params);
+  const motoId = resolvedParams.id;
   const router = useRouter();
 
   const [moto, setMoto] = useState(null);
@@ -118,32 +118,6 @@ export default function MotoDetailPage({ params }) {
     setSubmitting(false);
   };
 
-  const handleResetPart = async (part) => {
-    const costInput = prompt(`Coût du remplacement pour "${part.name}" (€) :`, '0');
-    if (costInput === null) return;
-
-    const cost = parseFloat(costInput) || 0;
-    const { data: { user } } = await supabase.auth.getUser();
-
-    await supabase
-      .from('parts')
-      .update({ last_service_hours: moto.hours })
-      .eq('id', part.id);
-
-    await supabase.from('logs').insert([
-      {
-        moto_id: motoId,
-        user_id: user.id,
-        title: `Entretien : ${part.name}`,
-        hours_at_done: moto.hours,
-        cost: cost,
-        notes: `Remplacement effectué à ${moto.hours}h`,
-      },
-    ]);
-
-    await fetchMotoData();
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#09090b] text-white flex items-center justify-center p-4">
@@ -159,8 +133,8 @@ export default function MotoDetailPage({ params }) {
   const upcomingParts = parts.filter(p => (moto.hours - p.last_service_hours) < p.interval_hours);
 
   return (
-    <div className="min-h-screen bg-[#08080a] text-zinc-100 p-4 sm:p-6 pb-28 font-sans selection:bg-orange-500 selection:text-black">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="min-h-screen bg-[#08080a] text-zinc-100 p-4 sm:p-6 pb-36 font-sans selection:bg-orange-500 selection:text-black">
+      <div className="max-w-md md:max-w-xl mx-auto space-y-6">
         
         {/* Navigation / Header */}
         <div className="flex items-center justify-between">
@@ -239,8 +213,7 @@ export default function MotoDetailPage({ params }) {
                 return (
                   <div
                     key={part.id}
-                    onClick={() => handleResetPart(part)}
-                    className="group bg-gradient-to-r from-[#241012] to-[#140b0c] border border-red-500/30 hover:border-red-500/60 p-4 rounded-2xl space-y-3 cursor-pointer transition-all shadow-md active:scale-[0.99]"
+                    className="bg-gradient-to-r from-[#241012] to-[#140b0c] border border-red-500/30 p-4 rounded-2xl space-y-3 shadow-md"
                   >
                     <div className="flex justify-between items-start">
                       <div className="space-y-0.5">
@@ -285,8 +258,7 @@ export default function MotoDetailPage({ params }) {
                 return (
                   <div
                     key={part.id}
-                    onClick={() => handleResetPart(part)}
-                    className="group bg-[#111114] border border-zinc-800/80 hover:border-orange-500/40 p-4 rounded-2xl space-y-3 cursor-pointer transition-all shadow-md active:scale-[0.99]"
+                    className="bg-[#111114] border border-zinc-800/80 p-4 rounded-2xl space-y-3 shadow-md"
                   >
                     <div className="flex justify-between items-start">
                       <div className="space-y-0.5">
@@ -337,7 +309,7 @@ export default function MotoDetailPage({ params }) {
       </div>
 
       {/* Bouton d'action flottant (+ composant) */}
-      <div className="fixed bottom-6 left-0 right-0 flex justify-center z-40 pointer-events-none">
+      <div className="fixed bottom-20 left-0 right-0 flex justify-center z-40 pointer-events-none">
         <button
           onClick={() => setShowPartModal(true)}
           className="pointer-events-auto bg-gradient-to-r from-orange-600 to-orange-400 text-black font-black text-xl px-6 py-3 rounded-2xl shadow-xl shadow-orange-500/25 border border-orange-300/40 transition-transform hover:scale-105 active:scale-95 flex items-center gap-2"
