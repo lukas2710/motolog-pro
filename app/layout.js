@@ -11,6 +11,10 @@ export const metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Suivi Moto',
   },
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
+  },
 };
 
 export default function RootLayout({ children }) {
