@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -185,10 +186,7 @@ export default function MotoDetailPage({ params }) {
             ← GARAGE
           </button>
           
-          <Link
-            href={`/dashboard/${motoId}/costs`}
-            className="text-xs font-mono font-semibold text-emerald-400 bg-emerald-950/30 border border-emerald-500/20 hover:border-emerald-500/40 px-3 py-1.5 rounded-xl transition-all"
-          >
+          <Link className="text-xs font-mono font-semibold text-emerald-400 bg-emerald-950/30 border border-emerald-500/20 hover:border-emerald-500/40 px-3 py-1.5 rounded-xl transition-all" href={`/dashboard/${motoId}/costs`}>
             📊 Dépenses
           </Link>
         </div>
@@ -367,28 +365,6 @@ export default function MotoDetailPage({ params }) {
           )}
         </div>
 
-        <div className="space-y-3 pt-2">
-          <h2 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase">
-            HISTORIQUE DES TRAVAUX
-          </h2>
-
-          <div className="space-y-2">
-            {logs.map((log) => (
-              <div key={log.id} className="bg-[#111114] border border-zinc-800/50 p-3.5 rounded-2xl flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-xs text-zinc-200">{log.title}</h3>
-                  <p className="text-[10px] font-mono text-zinc-500 mt-0.5">
-                    {new Date(log.performed_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })} • {log.hours_at_done}h
-                  </p>
-                </div>
-                <span className="text-xs font-mono font-bold text-orange-400">
-                  {log.cost ? `${Number(log.cost).toFixed(2)} €` : '0,00 €'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
       </div>
 
       <div className="fixed bottom-20 left-0 right-0 flex justify-center z-40 pointer-events-none">
@@ -524,10 +500,7 @@ export default function MotoDetailPage({ params }) {
               Vous avez atteint la limite de 5 entretiens sur cette moto. Débloquez l'accès illimité à vie pour toutes vos motos et entretiens.
             </p>
             <div className="pt-2 flex flex-col gap-2">
-              <Link
-                href="/upgrade"
-                className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-black font-mono text-xs font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20"
-              >
+              <Link className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-black font-mono text-xs font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20" href="/upgrade">
                 DÉCOUVRIR L'ILLIMITÉ
               </Link>
               <button
