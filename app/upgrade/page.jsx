@@ -1,14 +1,13 @@
 'use client';
 import { useState } from 'react';
-import { supabase } from '../supabase';
 
 export default function UpgradePage() {
   const [loading, setLoading] = useState(false);
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = () => {
     setLoading(true);
-    // Logique de paiement ou de mise à niveau
-    setLoading(false);
+    // Remplace le lien ci-dessous par ton véritable lien de paiement Stripe
+    window.location.href = 'https://buy.stripe.com/bJe9ASgyJ6hbd2v0e6f3a0l';
   };
 
   return (
@@ -21,7 +20,7 @@ export default function UpgradePage() {
           disabled={loading}
           className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-black font-mono text-xs font-bold rounded-xl transition-all"
         >
-          {loading ? 'CHARGEMENT...' : 'SOUSCRIRE'}
+          {loading ? 'REDIRECTION...' : 'SOUSCRIRE'}
         </button>
       </div>
     </div>

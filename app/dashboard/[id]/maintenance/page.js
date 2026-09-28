@@ -34,7 +34,7 @@ export default function MaintenancePage({ params }) {
     }
     setMoto(motoData);
 
-    // Récupérer les pièces associées à cette moto (pour l'accueil)
+    // Récupérer les pièces associées à cette moto
     const { data: partsData } = await supabase
       .from('parts')
       .select('*')
@@ -69,31 +69,32 @@ export default function MaintenancePage({ params }) {
       return;
     }
 
-    const numericHours = hours ? parseFloat(hours) : null;
+    const numericHours = hours !== '' ? parseFloat(hours) : null;
 
-    // 1. Insérer l'entretien dans la table logs
+    // 1. Insérer l'entretien dans la table logs (avec hours_at_done inclus)
     const { error: logError } = await supabase.from('logs').insert([
       {
         user_id: user.id,
         moto_id: motoId,
-        part_id: selectedPartId ? selectedPartId : null,
+        part_id: selectedPartId !== '' ? selectedPartId : null,
         title: title.trim(),
         performed_at: date,
         hours: numericHours,
-        cost: cost ? parseFloat(cost) : 0,
-        notes: notes.trim(),
+        hours_at_done: numericHours,
+        cost: cost !== '' ? parseFloat(cost) : 0,
+        notes: notes.trim() !== '' ? notes.trim() : null,
       }
     ]);
 
     if (logError) {
-      console.error(logError);
-      alert("Erreur lors de l'enregistrement de l'entretien.");
+      console.error("Erreur Supabase:", logError);
+      alert(`Erreur lors de l'enregistrement : ${logError.message}`);
       setSubmitting(false);
       return;
     }
 
-    // 2. Si une pièce est liée et qu'on a renseigné des heures, mettre à jour la pièce sur l'accueil
-    if (selectedPartId && numericHours !== null) {
+    // 2. Si une pièce est liée et qu'on a renseigné des heures, mettre à jour la pièce
+    if (selectedPartId !== '' && numericHours !== null) {
       const { error: partError } = await supabase
         .from('parts')
         .update({ last_service_hours: numericHours })

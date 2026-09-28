@@ -22,19 +22,21 @@ export default function AccountPage() {
       }
       setUser(user);
       setNewEmail(user.email || '');
-      
-      // Interroge directement la base de données Supabase avec gestion d'erreur
-      const { data: profile, error } = await supabase
+
+      const { data: profile } = await supabase
         .from('profiles')
         .select('is_premium')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error("Erreur Supabase (vérifie les politiques RLS) :", error.message);
+      if (profile?.is_premium) {
+        setIsPremium(true);
+        localStorage.setItem("is_premium", "true");
+      } else {
+        const localStatus = localStorage.getItem("is_premium") === "true";
+        setIsPremium(localStatus);
       }
 
-      setIsPremium(profile?.is_premium || false);
       setLoading(false);
     }
     loadUser();
@@ -56,6 +58,25 @@ export default function AccountPage() {
     } else {
       setMessage('Modifications enregistrées avec succès !');
       setNewPassword('');
+    }
+    setSubmitting(false);
+  };
+
+  const handleForceSync = async () => {
+    if (!user) return;
+    setSubmitting(true);
+    
+    // Met à jour ou crée le profil dans la table profiles
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({ id: user.id, is_premium: true });
+
+    if (error) {
+      setMessage(`Erreur sync : ${error.message}`);
+    } else {
+      setIsPremium(true);
+      localStorage.setItem("is_premium", "true");
+      setMessage('Statut mis à jour : Compte passé en Premium avec succès !');
     }
     setSubmitting(false);
   };
@@ -83,7 +104,7 @@ export default function AccountPage() {
           <span className="text-xs font-mono text-zinc-500">{user?.email}</span>
         </div>
 
-        {/* Statut du compte (Gratuit / Premium) */}
+        {/* Statut du compte & Bouton de synchronisation */}
         <div className="bg-[#111114] border border-zinc-800/80 p-6 rounded-3xl space-y-4 shadow-2xl">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Statut de l'abonnement</span>
@@ -98,16 +119,24 @@ export default function AccountPage() {
             )}
           </div>
 
-          {!isPremium && (
-            <div className="pt-2">
+          <div className="space-y-2 pt-2">
+            {!isPremium && (
               <button
                 onClick={() => router.push('/upgrade')}
                 className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-black font-mono text-xs font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20"
               >
                 PASSER AU PREMIUM (9,99 €)
               </button>
-            </div>
-          )}
+            )}
+            
+            <button
+              onClick={handleForceSync}
+              disabled={submitting}
+              className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs font-bold rounded-xl transition-all border border-zinc-700"
+            >
+              🔄 FORCER LA MISE À JOUR DU STATUT
+            </button>
+          </div>
         </div>
 
         {/* Formulaire Modification Email / Mot de passe */}
@@ -158,6 +187,7 @@ export default function AccountPage() {
           <button
             onClick={async () => {
               await supabase.auth.signOut();
+              localStorage.removeItem("is_premium");
               router.push('/');
             }}
             className="w-full py-3 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-mono text-xs font-bold rounded-xl transition-all"
