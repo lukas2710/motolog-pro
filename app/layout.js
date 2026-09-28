@@ -1,11 +1,16 @@
 import './globals.css';
 import BottomNav from '../components/BottomNav';
 
+export const viewport = {
+  themeColor: '#f97316',
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export const metadata = {
   title: 'Suivi Moto',
   description: 'Application de suivi d\'entretien et dépenses moto',
   manifest: '/manifest.json',
-  themeColor: '#f97316',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

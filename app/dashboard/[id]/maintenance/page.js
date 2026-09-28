@@ -27,6 +27,9 @@ export default function MaintenancePage() {
   const [parts, setParts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // État pour afficher ou masquer le formulaire d'ajout
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
   // États du formulaire
   const [title, setTitle] = useState('');
   const [formCategory, setFormCategory] = useState('');
@@ -129,20 +132,36 @@ export default function MaintenancePage() {
     setHours('');
     setCost('');
     setNotes('');
+    setIsFormOpen(false); // Ferme le formulaire après validation
     fetchMaintenanceData();
     setSubmitting(false);
+  };
+
+  // Fonction pour supprimer un entretien
+  const handleDeleteLog = async (logId) => {
+    if (!confirm("Voulez-vous vraiment supprimer cet entretien ?")) return;
+
+    const { error } = await supabase
+      .from('logs')
+      .delete()
+      .eq('id', logId);
+
+    if (error) {
+      console.error("Erreur suppression:", error);
+      alert(`Erreur lors de la suppression : ${error.message}`);
+      return;
+    }
+
+    // Rafraîchir les données
+    fetchMaintenanceData();
   };
 
   // Filtrage des entretiens pour l'historique
   const filteredLogs = logs.filter((log) => {
     if (!historyFilterCategory) return true;
-    // Si l'entretien a une pièce liée, on vérifie si la pièce correspond à la catégorie du filtre
     const linkedPart = parts.find((p) => p.id === log.part_id);
     if (linkedPart && linkedPart.category === historyFilterCategory) return true;
-    
-    // Optionnel : si le titre correspond ou contient la catégorie (sécurité supplémentaire)
     if (log.title.toLowerCase().includes(historyFilterCategory.toLowerCase())) return true;
-
     return false;
   });
 
@@ -169,121 +188,131 @@ export default function MaintenancePage() {
           </div>
         </div>
 
-        {/* Formulaire d'ajout redessiné */}
-        <form onSubmit={handleAddLog} className="bg-[#121215]/90 border border-zinc-800/80 p-6 sm:p-8 rounded-3xl space-y-5 shadow-2xl backdrop-blur-md">
-          <div className="flex items-center gap-3 border-b border-zinc-800/60 pb-4">
-            <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
-            <h2 className="text-xs font-mono font-bold tracking-widest text-zinc-300 uppercase">Nouvel entretien</h2>
-          </div>
+        {/* Bouton pour afficher/masquer le formulaire */}
+        <button
+          onClick={() => setIsFormOpen(!isFormOpen)}
+          className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black font-mono text-xs font-black tracking-widest uppercase rounded-xl transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 active:scale-[0.99] flex items-center justify-center gap-2"
+        >
+          <span>{isFormOpen ? '✖ FERMER LE FORMULAIRE' : '➕ AJOUTER UN ENTRETIEN'}</span>
+        </button>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Titre / Intervention</label>
-              <input
-                type="text"
-                required
-                placeholder="Ex: Vidange boîte de vitesse, kit chaîne..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner"
-              />
+        {/* Formulaire d'ajout (affiché conditionnellement) */}
+        {isFormOpen && (
+          <form onSubmit={handleAddLog} className="bg-[#121215]/90 border border-zinc-800/80 p-6 sm:p-8 rounded-3xl space-y-5 shadow-2xl backdrop-blur-md transition-all">
+            <div className="flex items-center gap-3 border-b border-zinc-800/60 pb-4">
+              <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+              <h2 className="text-xs font-mono font-bold tracking-widest text-zinc-300 uppercase">Nouvel entretien</h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div>
-                  <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Filtrer les pièces par catégorie</label>
-                  <select
-                    value={formCategory}
-                    onChange={(e) => {
-                      setFormCategory(e.target.value);
-                      setSelectedPartId('');
-                    }}
-                    className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner cursor-pointer"
-                  >
-                    <option value="" className="bg-zinc-900">Toutes les catégories</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat.id} value={cat.name} className="bg-zinc-900">{cat.icon} {cat.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Lier à une pièce</label>
-                  <select
-                    value={selectedPartId}
-                    onChange={(e) => setSelectedPartId(e.target.value)}
-                    className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner cursor-pointer"
-                  >
-                    <option value="" className="bg-zinc-900">Aucune pièce spécifique</option>
-                    {parts
-                      .filter((part) => !formCategory || part.category === formCategory)
-                      .map((part) => (
-                        <option key={part.id} value={part.id} className="bg-zinc-900">
-                          {part.name} (Max: {part.interval_hours}h)
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              </div>
-
+            <div className="space-y-4">
               <div>
-                <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Heures moteur</label>
+                <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Titre / Intervention</label>
                 <input
-                  type="number"
-                  step="0.1"
-                  placeholder="Ex: 45.5"
-                  value={hours}
-                  onChange={(e) => setHours(e.target.value)}
-                  className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Date de l'intervention</label>
-                <input
-                  type="date"
+                  type="text"
                   required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner cursor-pointer"
-                />
-              </div>
-              <div>
-                <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Coût total (€)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={cost}
-                  onChange={(e) => setCost(e.target.value)}
+                  placeholder="Ex: Vidange boîte de vitesse, kit chaîne..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner"
                 />
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Filtrer les pièces par catégorie</label>
+                    <select
+                      value={formCategory}
+                      onChange={(e) => {
+                        setFormCategory(e.target.value);
+                        setSelectedPartId('');
+                      }}
+                      className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner cursor-pointer"
+                    >
+                      <option value="" className="bg-zinc-900">Toutes les catégories</option>
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat.id} value={cat.name} className="bg-zinc-900">{cat.icon} {cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Lier à une pièce</label>
+                    <select
+                      value={selectedPartId}
+                      onChange={(e) => setSelectedPartId(e.target.value)}
+                      className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner cursor-pointer"
+                    >
+                      <option value="" className="bg-zinc-900">Aucune pièce spécifique</option>
+                      {parts
+                        .filter((part) => !formCategory || part.category === formCategory)
+                        .map((part) => (
+                          <option key={part.id} value={part.id} className="bg-zinc-900">
+                            {part.name} (Max: {part.interval_hours}h)
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Heures moteur</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="Ex: 45.5"
+                    value={hours}
+                    onChange={(e) => setHours(e.target.value)}
+                    className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Date de l'intervention</label>
+                  <input
+                    type="date"
+                    required
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Coût total (€)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={cost}
+                    onChange={(e) => setCost(e.target.value)}
+                    className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Notes / Références (optionnel)</label>
+                <textarea
+                  placeholder="Remarques, références des pièces achetées..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows="3"
+                  className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner resize-none"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5 font-medium">Notes / Références (optionnel)</label>
-              <textarea
-                placeholder="Remarques, références des pièces achetées..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows="3"
-                className="w-full bg-black/60 border border-zinc-800/80 focus:border-orange-500/80 p-3.5 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-inner resize-none"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black font-mono text-xs font-black tracking-widest uppercase rounded-xl transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 active:scale-[0.99] disabled:opacity-50"
-          >
-            {submitting ? 'ENREGISTREMENT EN COURS...' : 'VALIDER L\'ENTRETIEN'}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black font-mono text-xs font-black tracking-widest uppercase rounded-xl transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 active:scale-[0.99] disabled:opacity-50"
+            >
+              {submitting ? 'ENREGISTREMENT EN COURS...' : 'VALIDER L\'ENTRETIEN'}
+            </button>
+          </form>
+        )}
 
         {/* Section Historique avec sélecteur de catégorie style Accueil */}
         <div className="space-y-4 pt-4">
@@ -293,7 +322,6 @@ export default function MaintenancePage() {
               <span className="text-[10px] font-mono text-zinc-500">{filteredLogs.length} affiché(s) sur {logs.length}</span>
             </div>
 
-            {/* Sélecteur de filtre par catégorie (identique à l'accueil) */}
             <select
               value={historyFilterCategory}
               onChange={(e) => setHistoryFilterCategory(e.target.value)}
@@ -335,11 +363,22 @@ export default function MaintenancePage() {
                           )}
                         </p>
                       </div>
-                      {log.cost > 0 && (
-                        <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-xl shrink-0">
-                          {log.cost} €
-                        </span>
-                      )}
+
+                      <div className="flex items-center gap-3">
+                        {log.cost > 0 && (
+                          <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-xl shrink-0">
+                            {log.cost} €
+                          </span>
+                        )}
+                        {/* Bouton de suppression */}
+                        <button
+                          onClick={() => handleDeleteLog(log.id)}
+                          className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
+                          title="Supprimer l'entretien"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
 
                     {linkedPart && (
