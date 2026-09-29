@@ -84,6 +84,23 @@ export default function MotoDetailPage({ params }) {
     fetchMotoData();
   }, [motoId]);
 
+  const handleDeletePart = async (partId, e) => {
+    e.stopPropagation();
+    if (!confirm("Voulez-vous vraiment supprimer ce contrôle ?")) return;
+
+    const { error } = await supabase
+      .from('parts')
+      .delete()
+      .eq('id', partId);
+
+    if (!error) {
+      if (selectedPartForHistory?.id === partId) {
+        setSelectedPartForHistory(null);
+      }
+      await fetchMotoData();
+    }
+  };
+
   const handleAddLog = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -281,7 +298,7 @@ export default function MotoDetailPage({ params }) {
                   <div
                     key={part.id}
                     onClick={() => setSelectedPartForHistory(part)}
-                    className="bg-gradient-to-r from-[#241012] to-[#140b0c] border border-red-500/30 p-4 rounded-2xl space-y-3 shadow-md cursor-pointer hover:border-red-500/60 transition-all"
+                    className="bg-gradient-to-r from-[#241012] to-[#140b0c] border border-red-500/30 p-4 rounded-2xl space-y-3 shadow-md cursor-pointer hover:border-red-500/60 transition-all relative group"
                   >
                     <div className="flex justify-between items-start">
                       <div className="space-y-0.5">
@@ -295,9 +312,18 @@ export default function MotoDetailPage({ params }) {
                         </div>
                         <p className="text-[10px] font-mono text-zinc-400">Intervalle : {part.interval_hours}h {part.category ? `• ${part.category}` : ''} • <span className="text-orange-400 underline">Voir historique</span></p>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-md">
-                        +{overdueHours}h retard
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-md">
+                          +{overdueHours}h retard
+                        </span>
+                        <button
+                          onClick={(e) => handleDeletePart(part.id, e)}
+                          title="Supprimer ce contrôle"
+                          className="text-zinc-500 hover:text-red-400 p-1.5 rounded-lg transition-colors bg-black/40 border border-zinc-800"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
 
                     <div className="w-full bg-black/60 h-1.5 rounded-full overflow-hidden p-0.5 border border-red-950">
@@ -333,7 +359,7 @@ export default function MotoDetailPage({ params }) {
                   <div
                     key={part.id}
                     onClick={() => setSelectedPartForHistory(part)}
-                    className="bg-[#111114] border border-zinc-800/80 p-4 rounded-2xl space-y-3 shadow-md cursor-pointer hover:border-zinc-700 transition-all"
+                    className="bg-[#111114] border border-zinc-800/80 p-4 rounded-2xl space-y-3 shadow-md cursor-pointer hover:border-zinc-700 transition-all relative group"
                   >
                     <div className="flex justify-between items-start">
                       <div className="space-y-0.5">
@@ -347,9 +373,18 @@ export default function MotoDetailPage({ params }) {
                         </div>
                         <p className="text-[10px] font-mono text-zinc-500">Prévu tous les {part.interval_hours}h {part.category ? `• ${part.category}` : ''} • <span className="text-orange-400 underline">Voir historique</span></p>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-md">
-                        Dans {remainingHours}h
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-md">
+                          Dans {remainingHours}h
+                        </span>
+                        <button
+                          onClick={(e) => handleDeletePart(part.id, e)}
+                          title="Supprimer ce contrôle"
+                          className="text-zinc-500 hover:text-red-400 p-1.5 rounded-lg transition-colors bg-black/40 border border-zinc-800"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
 
                     <div className="w-full bg-black/60 h-1.5 rounded-full overflow-hidden p-0.5 border border-zinc-800">
@@ -410,13 +445,22 @@ export default function MotoDetailPage({ params }) {
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setSelectedPartForHistory(null)}
-              className="w-full py-2.5 bg-zinc-900 text-zinc-300 hover:text-white font-mono text-xs rounded-xl mt-4"
-            >
-              Fermer
-            </button>
+            <div className="flex gap-2 pt-4">
+              <button
+                type="button"
+                onClick={(e) => handleDeletePart(selectedPartForHistory.id, e)}
+                className="w-1/2 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 font-mono text-xs rounded-xl transition-colors"
+              >
+                Supprimer le contrôle
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedPartForHistory(null)}
+                className="w-1/2 py-2.5 bg-zinc-900 text-zinc-300 hover:text-white font-mono text-xs rounded-xl"
+              >
+                Fermer
+              </button>
+            </div>
           </div>
         </div>
       )}

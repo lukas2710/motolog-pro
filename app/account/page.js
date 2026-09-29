@@ -33,8 +33,8 @@ export default function AccountPage() {
         setIsPremium(true);
         localStorage.setItem("is_premium", "true");
       } else {
-        const localStatus = localStorage.getItem("is_premium") === "true";
-        setIsPremium(localStatus);
+        setIsPremium(false);
+        localStorage.setItem("is_premium", "false");
       }
 
       setLoading(false);
@@ -62,21 +62,27 @@ export default function AccountPage() {
     setSubmitting(false);
   };
 
-  const handleForceSync = async () => {
+  const handleCheckStatus = async () => {
     if (!user) return;
     setSubmitting(true);
-    
-    // Met à jour ou crée le profil dans la table profiles
-    const { error } = await supabase
+    setMessage('');
+
+    const { data: profile, error } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, is_premium: true });
+      .select('is_premium')
+      .eq('id', user.id)
+      .single();
 
     if (error) {
-      setMessage(`Erreur sync : ${error.message}`);
-    } else {
+      setMessage(`Erreur de vérification : ${error.message}`);
+    } else if (profile?.is_premium) {
       setIsPremium(true);
       localStorage.setItem("is_premium", "true");
-      setMessage('Statut mis à jour : Compte passé en Premium avec succès !');
+      setMessage('Statut vérifié : Compte Premium actif !');
+    } else {
+      setIsPremium(false);
+      localStorage.setItem("is_premium", "false");
+      setMessage('Statut vérifié : Compte Standard (Non Premium).');
     }
     setSubmitting(false);
   };
@@ -104,7 +110,7 @@ export default function AccountPage() {
           <span className="text-xs font-mono text-zinc-500">{user?.email}</span>
         </div>
 
-        {/* Statut du compte & Bouton de synchronisation */}
+        {/* Statut du compte & Bouton de vérification */}
         <div className="bg-[#111114] border border-zinc-800/80 p-6 rounded-3xl space-y-4 shadow-2xl">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Statut de l'abonnement</span>
@@ -130,11 +136,11 @@ export default function AccountPage() {
             )}
             
             <button
-              onClick={handleForceSync}
+              onClick={handleCheckStatus}
               disabled={submitting}
               className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono text-xs font-bold rounded-xl transition-all border border-zinc-700"
             >
-              🔄 FORCER LA MISE À JOUR DU STATUT
+              🔄 VÉRIFIER LE STATUT
             </button>
           </div>
         </div>
