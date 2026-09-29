@@ -9,7 +9,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   // Formulaire nouvelle moto
+  const [motoBrand, setMotoBrand] = useState('');
   const [motoName, setMotoName] = useState('');
+  const [motoYear, setMotoYear] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const fetchMotos = async () => {
@@ -34,7 +36,7 @@ export default function DashboardPage() {
 
   const handleAddMoto = async (e) => {
     e.preventDefault();
-    if (!motoName.trim()) return;
+    if (!motoBrand.trim() || !motoName.trim() || !motoYear.trim()) return;
     setSubmitting(true);
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -43,7 +45,9 @@ export default function DashboardPage() {
     const { error } = await supabase.from('motos').insert([
       {
         user_id: user.id,
+        brand: motoBrand.trim(),
         name: motoName.trim(),
+        year: parseInt(motoYear.trim(), 10),
       }
     ]);
 
@@ -53,7 +57,9 @@ export default function DashboardPage() {
       return;
     }
 
+    setMotoBrand('');
     setMotoName('');
+    setMotoYear('');
     fetchMotos();
     setSubmitting(false);
   };
@@ -90,13 +96,29 @@ export default function DashboardPage() {
         {/* Formulaire ajout de moto */}
         <form onSubmit={handleAddMoto} className="bg-[#121215] border border-zinc-800 p-6 rounded-3xl space-y-4">
           <h2 className="text-xs font-mono font-bold tracking-widest text-zinc-300 uppercase">Ajouter une moto</h2>
-          <div>
+          <div className="space-y-3">
             <input
               type="text"
               required
-              placeholder="Ex: ERZ 250, YZ 125..."
+              placeholder="Marque (Ex: Suzuki, Yamaha...)"
+              value={motoBrand}
+              onChange={(e) => setMotoBrand(e.target.value)}
+              className="w-full bg-black/60 border border-zinc-800 focus:border-orange-500 p-3 rounded-xl text-sm text-white focus:outline-none"
+            />
+            <input
+              type="text"
+              required
+              placeholder="Modèle/Nom (Ex: ERZ 250, YZ 125...)"
               value={motoName}
               onChange={(e) => setMotoName(e.target.value)}
+              className="w-full bg-black/60 border border-zinc-800 focus:border-orange-500 p-3 rounded-xl text-sm text-white focus:outline-none"
+            />
+            <input
+              type="number"
+              required
+              placeholder="Année (Ex: 2024)"
+              value={motoYear}
+              onChange={(e) => setMotoYear(e.target.value)}
               className="w-full bg-black/60 border border-zinc-800 focus:border-orange-500 p-3 rounded-xl text-sm text-white focus:outline-none"
             />
           </div>
@@ -125,7 +147,7 @@ export default function DashboardPage() {
                 className="block bg-[#121215] border border-zinc-800 hover:border-orange-500 p-5 rounded-2xl transition group"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm text-white uppercase group-hover:text-orange-500 transition">{moto.name}</h3>
+                  <h3 className="font-bold text-sm text-white uppercase group-hover:text-orange-500 transition">{moto.brand} {moto.name} ({moto.year})</h3>
                   <span className="text-xs font-mono text-zinc-500">Gérer →</span>
                 </div>
               </Link>
