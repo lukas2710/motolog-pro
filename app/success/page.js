@@ -7,7 +7,23 @@ import { supabase } from '../supabase';
 export default function SuccessPage() {
   const router = useRouter();
 
+  const handleActivateAndRedirect = async () => {
+    localStorage.setItem("is_premium", "true");
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ is_premium: true })
+        .eq('id', user.id);
+    }
+
+    router.push('/dashboard');
+  };
+
   useEffect(() => {
+    localStorage.setItem("is_premium", "true");
+    
     const activatePremium = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -42,7 +58,7 @@ export default function SuccessPage() {
         </div>
 
         <button
-          onClick={() => router.push('/dashboard')}
+          onClick={handleActivateAndRedirect}
           className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-black font-mono text-xs font-black tracking-widest uppercase rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
         >
           OK

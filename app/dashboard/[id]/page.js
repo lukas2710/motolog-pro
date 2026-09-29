@@ -537,22 +537,22 @@ export default function MotoDetailPage({ params }) {
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-[#111114] border border-orange-500/40 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl text-center">
             <span className="text-[10px] font-mono font-bold tracking-widest text-orange-500 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full uppercase">
-              VERSION GRATUITE LIMITÉE
+              LIMITE ATTEINTE (5 CONTRÔLES)
             </span>
-            <h3 className="text-lg font-black text-white tracking-tight">Passez à la vitesse supérieure</h3>
+            <h3 className="text-lg font-black text-white tracking-tight">Passez au Premium</h3>
             <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-              Vous avez atteint la limite de 5 entretiens sur cette moto. Débloquez l'accès illimité à vie pour toutes vos motos et entretiens.
+              La version gratuite est limitée à 5 contrôles enregistrés. Débloquez l'accès illimité à vie pour <strong className="text-white">10 € à vie</strong> sans abonnement.
             </p>
             <div className="pt-2 flex flex-col gap-2">
               <Link className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-black font-mono text-xs font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20" href="/upgrade">
-                DÉCOUVRIR L'ILLIMITÉ
+                DÉBLOQUER L'ILLIMITÉ (10 €)
               </Link>
               <button
                 type="button"
                 onClick={() => setShowUpgradeModal(false)}
                 className="w-full py-2 bg-zinc-900 text-zinc-400 hover:text-white font-mono text-xs rounded-xl transition-colors"
               >
-                Plus tard
+                Fermer
               </button>
             </div>
           </div>
