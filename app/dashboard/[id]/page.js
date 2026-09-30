@@ -36,11 +36,8 @@ export default function MotoDetailPage({ params }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedPartForHistory, setSelectedPartForHistory] = useState(null);
 
-  const [logTitle, setLogTitle] = useState('');
   const [logHours, setLogHours] = useState('');
-  const [logNotes, setLogNotes] = useState('');
-  const [logCost, setLogCost] = useState('0');
-  const [logPartId, setLogPartId] = useState('');
+  const [logReason, setLogReason] = useState('');
 
   const [partName, setPartName] = useState('');
   const [partCategory, setPartCategory] = useState(CATEGORIES[0].name);
@@ -110,11 +107,11 @@ export default function MotoDetailPage({ params }) {
       {
         moto_id: motoId,
         user_id: user.id,
-        title: logTitle,
+        title: logReason,
         hours_at_done: parseFloat(logHours),
-        notes: logNotes,
-        cost: parseFloat(logCost) || 0,
-        part_id: logPartId ? logPartId : null,
+        notes: null,
+        cost: 0,
+        part_id: null,
       },
     ]);
 
@@ -125,10 +122,7 @@ export default function MotoDetailPage({ params }) {
           .update({ hours: parseFloat(logHours) })
           .eq('id', motoId);
       }
-      setLogTitle('');
-      setLogNotes('');
-      setLogCost('0');
-      setLogPartId('');
+      setLogReason('');
       setShowLogModal(false);
       await fetchMotoData();
     }
@@ -276,20 +270,21 @@ export default function MotoDetailPage({ params }) {
           })}
         </div>
 
+        {/* Section Urgences */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
               A FAIRE EN PRIORITÉ ({overdueParts.length})
             </h2>
           </div>
 
           {overdueParts.length === 0 ? (
-            <div className="bg-[#111114] border border-zinc-800/50 rounded-2xl p-4 text-center">
-              <p className="text-xs text-zinc-500 font-mono">Aucun entretien en retard pour ce filtre.</p>
+            <div className="bg-[#111114]/60 border border-zinc-800/40 rounded-2xl p-4 text-center">
+              <p className="text-xs text-zinc-500 font-mono">Aucun entretien en retard.</p>
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {overdueParts.map((part) => {
                 const hoursUsed = moto.hours - part.last_service_hours;
                 const overdueHours = (hoursUsed - part.interval_hours).toFixed(1);
@@ -298,27 +293,27 @@ export default function MotoDetailPage({ params }) {
                   <div
                     key={part.id}
                     onClick={() => setSelectedPartForHistory(part)}
-                    className="bg-gradient-to-r from-[#241012] to-[#140b0c] border border-red-500/30 p-4 rounded-2xl space-y-3 shadow-md cursor-pointer hover:border-red-500/60 transition-all relative group"
+                    className="group bg-gradient-to-br from-[#1c1214] via-[#140b0e] to-[#0f0a0c] border border-red-500/30 hover:border-red-500/60 p-4 rounded-2xl space-y-3 shadow-lg cursor-pointer transition-all"
                   >
                     <div className="flex justify-between items-start">
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          {part.category && (
-                            <span className="text-xs">
-                              {CATEGORIES.find(c => c.name === part.category)?.icon || '🔧'}
-                            </span>
-                          )}
-                          <h3 className="font-bold text-xs tracking-wide text-zinc-100 uppercase">{part.name}</h3>
+                          <span className="text-sm bg-red-500/10 p-1.5 rounded-lg border border-red-500/20">
+                            {CATEGORIES.find(c => c.name === part.category)?.icon || '🔧'}
+                          </span>
+                          <div>
+                            <h3 className="font-bold text-xs tracking-wide text-zinc-100 uppercase">{part.name}</h3>
+                            <p className="text-[10px] font-mono text-zinc-400">{part.category || 'Général'} • Intervalle : {part.interval_hours}h</p>
+                          </div>
                         </div>
-                        <p className="text-[10px] font-mono text-zinc-400">Intervalle : {part.interval_hours}h {part.category ? `• ${part.category}` : ''} • <span className="text-orange-400 underline">Voir historique</span></p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-md">
-                          +{overdueHours}h retard
+                        <span className="text-[10px] font-mono font-bold text-red-400 bg-red-500/10 border border-red-500/30 px-2.5 py-1 rounded-lg">
+                          +{overdueHours}h de retard
                         </span>
                         <button
                           onClick={(e) => handleDeletePart(part.id, e)}
-                          title="Supprimer ce contrôle"
+                          title="Supprimer"
                           className="text-zinc-500 hover:text-red-400 p-1.5 rounded-lg transition-colors bg-black/40 border border-zinc-800"
                         >
                           🗑️
@@ -326,8 +321,15 @@ export default function MotoDetailPage({ params }) {
                       </div>
                     </div>
 
-                    <div className="w-full bg-black/60 h-1.5 rounded-full overflow-hidden p-0.5 border border-red-950">
-                      <div className="h-full bg-red-500 rounded-full w-full"></div>
+                    {/* Barre de progression Pro (Rouge) */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-mono text-zinc-400">
+                        <span>Utilisé : {hoursUsed.toFixed(1)}h / {part.interval_hours}h</span>
+                        <span className="text-red-400 font-bold">100% (À remplacer)</span>
+                      </div>
+                      <div className="w-full bg-black/80 h-2 rounded-full overflow-hidden p-0.5 border border-red-950/60 shadow-inner">
+                        <div className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full w-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -336,50 +338,59 @@ export default function MotoDetailPage({ params }) {
           )}
         </div>
 
+        {/* Section Prochains Entretiens */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-              PROCHAINS ENTRETIENS ({upcomingParts.length})
+              <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+              SOUS SURVEILLANCE ({upcomingParts.length})
             </h2>
           </div>
 
           {upcomingParts.length === 0 ? (
-            <div className="bg-[#111114] border border-zinc-800/50 rounded-2xl p-4 text-center">
-              <p className="text-xs text-zinc-500 font-mono">Aucun composant sous surveillance pour ce filtre.</p>
+            <div className="bg-[#111114]/60 border border-zinc-800/40 rounded-2xl p-4 text-center">
+              <p className="text-xs text-zinc-500 font-mono">Aucun composant enregistré.</p>
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {upcomingParts.map((part) => {
                 const hoursUsed = moto.hours - part.last_service_hours;
                 const remainingHours = (part.interval_hours - hoursUsed).toFixed(1);
                 const progress = Math.min((hoursUsed / part.interval_hours) * 100, 100);
 
+                // Couleur dynamique selon l'usure
+                let barColor = 'from-emerald-600 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.3)]';
+                let badgeClass = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                if (progress > 75) {
+                  barColor = 'from-amber-600 to-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.3)]';
+                  badgeClass = 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+                }
+
                 return (
                   <div
                     key={part.id}
                     onClick={() => setSelectedPartForHistory(part)}
-                    className="bg-[#111114] border border-zinc-800/80 p-4 rounded-2xl space-y-3 shadow-md cursor-pointer hover:border-zinc-700 transition-all relative group"
+                    className="group bg-[#111114] border border-zinc-800/80 hover:border-zinc-700 p-4 rounded-2xl space-y-3 shadow-lg cursor-pointer transition-all"
                   >
                     <div className="flex justify-between items-start">
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          {part.category && (
-                            <span className="text-xs">
-                              {CATEGORIES.find(c => c.name === part.category)?.icon || '🔧'}
-                            </span>
-                          )}
-                          <h3 className="font-bold text-xs tracking-wide text-zinc-200 uppercase">{part.name}</h3>
+                          <span className="text-sm bg-zinc-900 p-1.5 rounded-lg border border-zinc-800">
+                            {CATEGORIES.find(c => c.name === part.category)?.icon || '🔧'}
+                          </span>
+                          <div>
+                            <h3 className="font-bold text-xs tracking-wide text-zinc-200 uppercase">{part.name}</h3>
+                            <p className="text-[10px] font-mono text-zinc-500">{part.category || 'Général'} • Intervalle : {part.interval_hours}h</p>
+                          </div>
                         </div>
-                        <p className="text-[10px] font-mono text-zinc-500">Prévu tous les {part.interval_hours}h {part.category ? `• ${part.category}` : ''} • <span className="text-orange-400 underline">Voir historique</span></p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-md">
-                          Dans {remainingHours}h
+                        <span className={`text-[10px] font-mono font-bold border px-2.5 py-1 rounded-lg ${badgeClass}`}>
+                          Reste {remainingHours}h
                         </span>
                         <button
                           onClick={(e) => handleDeletePart(part.id, e)}
-                          title="Supprimer ce contrôle"
+                          title="Supprimer"
                           className="text-zinc-500 hover:text-red-400 p-1.5 rounded-lg transition-colors bg-black/40 border border-zinc-800"
                         >
                           🗑️
@@ -387,11 +398,18 @@ export default function MotoDetailPage({ params }) {
                       </div>
                     </div>
 
-                    <div className="w-full bg-black/60 h-1.5 rounded-full overflow-hidden p-0.5 border border-zinc-800">
-                      <div
-                        className="h-full bg-orange-500 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                      ></div>
+                    {/* Barre de progression Pro Dynamique */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-mono text-zinc-400">
+                        <span>Utilisé : {hoursUsed.toFixed(1)}h / {part.interval_hours}h</span>
+                        <span className="font-medium text-zinc-300">{progress.toFixed(0)}%</span>
+                      </div>
+                      <div className="w-full bg-black/80 h-2 rounded-full overflow-hidden p-0.5 border border-zinc-900 shadow-inner">
+                        <div
+                          className={`h-full bg-gradient-to-r rounded-full transition-all duration-500 ${barColor}`}
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -412,6 +430,7 @@ export default function MotoDetailPage({ params }) {
         </button>
       </div>
 
+      {/* Modal Historique */}
       {selectedPartForHistory && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-[#111114] border border-zinc-800 p-6 rounded-3xl w-full max-w-md space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
@@ -451,7 +470,7 @@ export default function MotoDetailPage({ params }) {
                 onClick={(e) => handleDeletePart(selectedPartForHistory.id, e)}
                 className="w-1/2 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 font-mono text-xs rounded-xl transition-colors"
               >
-                Supprimer le contrôle
+                Supprimer
               </button>
               <button
                 type="button"
@@ -465,6 +484,7 @@ export default function MotoDetailPage({ params }) {
         </div>
       )}
 
+      {/* Modal Ajout Contrôle */}
       {showPartModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-[#111114] border border-zinc-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
@@ -533,6 +553,7 @@ export default function MotoDetailPage({ params }) {
         </div>
       )}
 
+      {/* Modal Upgrade */}
       {showUpgradeModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-[#111114] border border-orange-500/40 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl text-center">
@@ -559,61 +580,36 @@ export default function MotoDetailPage({ params }) {
         </div>
       )}
 
+      {/* Modal Heures */}
       {showLogModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-[#111114] border border-zinc-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">Mettre à jour les heures</h3>
             <form onSubmit={handleAddLog} className="space-y-3">
               <div>
-                <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1">Intervention</label>
+                <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1">Nouvelle heure du compteur</label>
                 <input
-                  type="text"
+                  type="number"
+                  step="0.1"
                   required
-                  placeholder="ex: Sortie terrain / session"
-                  value={logTitle}
-                  onChange={(e) => setLogTitle(e.target.value)}
+                  value={logHours}
+                  onChange={(e) => setLogHours(e.target.value)}
                   className="w-full bg-black border border-zinc-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-orange-500"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1">Associer à un composant (optionnel)</label>
-                <select
-                  value={logPartId}
-                  onChange={(e) => setLogPartId(e.target.value)}
+                <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1">Motif de la balade</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="ex: Sortie terrain / session..."
+                  value={logReason}
+                  onChange={(e) => setLogReason(e.target.value)}
                   className="w-full bg-black border border-zinc-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-orange-500"
-                >
-                  <option value="">-- Aucun composant spécifique --</option>
-                  {parts.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} ({p.interval_hours}h)</option>
-                  ))}
-                </select>
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1">Compteur (h)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    required
-                    value={logHours}
-                    onChange={(e) => setLogHours(e.target.value)}
-                    className="w-full bg-black border border-zinc-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-orange-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1">Coût (€)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={logCost}
-                    onChange={(e) => setLogCost(e.target.value)}
-                    className="w-full bg-black border border-zinc-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-orange-500"
-                  />
-                </div>
-              </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setShowLogModal(false)} className="px-4 py-2 bg-zinc-800 text-zinc-300 font-mono text-xs rounded-xl">Annuler</button>
                 <button type="submit" disabled={submitting} className="px-5 py-2 bg-orange-500 text-black font-mono text-xs font-bold rounded-xl">
