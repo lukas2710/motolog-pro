@@ -1,104 +1,28 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 
 /*
   ============================================================
   DIAGNOSTIC MOTO / DIRT / MOTOCROSS
   ============================================================
+
+  - Aucun appel API
+  - Aucun package supplémentaire
+  - Compatible Next.js / app router
+  - Tout est local
+  - Les vidéos YouTube sont volontairement des recherches
+    afin que tu puisses remplacer progressivement les liens
+    par TES propres tutoriels.
+
+  IMPORTANT :
+  Les valeurs techniques exactes (jeu aux soupapes, résistance
+  d'un stator, compression, couples de serrage, gicleurs, etc.)
+  dépendent de l'année et du moteur.
+
+  Le diagnostic donne donc une méthode de contrôle et renvoie
+  vers le manuel constructeur pour les valeurs exactes.
 */
-
-// ... (toutes les constantes ENGINE_TYPES, BIKE_FAMILIES, etc. restent identiques)
-
-// [Garde toutes les constantes et fonctions utilitaires du fichier d'origine ici...]
-
-export default function DiagnosticMotoPage() {
-  // -----------------------------------------------------------------
-  // GESTION PREMIUM / PAYWALL
-  // -----------------------------------------------------------------
-  const [isPremium, setIsPremium] = useState(false);
-  const [loadingAuth, setLoadingAuth] = useState(true);
-
-  useEffect(() => {
-    // Vérifie ton statut premium (ici via localStorage ou ta logique Supabase/Stripe habituelle)
-    // Adapte cette vérification selon la façon dont tu stockes le statut sur tes autres pages
-    const checkPremiumStatus = () => {
-      const storedPremium = localStorage.getItem("is_premium");
-      if (storedPremium === "true") {
-        setIsPremium(true);
-      }
-      setLoadingAuth(false);
-    };
-    checkPremiumStatus();
-  }, []);
-
-  const [step, setStep] = useState(0);
-  const [profile, setProfile] = useState({
-    engine: null,
-    family: null,
-    displacement: null,
-    model: null,
-    symptom: null,
-  });
-  const [answers, setAnswers] = useState({});
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Si la vérification est en cours
-  if (loadingAuth) {
-    return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
-        <p>Chargement...</p>
-      </div>
-    );
-  }
-
-  // SI PAS PREMIUM : BLOCAGE DE LA PAGE COMME SUR TES AUTRES PAGES
-  if (!isPremium) {
-    return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center p-6">
-        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center shadow-2xl">
-          <div className="text-4xl mb-4">🔒</div>
-          <h1 className="text-2xl font-bold mb-2">Contenu Réservé aux Membres Premium</h1>
-          <p className="text-zinc-400 text-sm mb-6">
-            Cette page de diagnostic avancé est bloquée. Débloque l'accès complet pour l'utiliser.
-          </p>
-          <button
-            onClick={() => {
-              // Simulation ou redirection vers ton lien Stripe / Checkout
-              window.location.href = "/upgrade"; 
-            }}
-            className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 font-semibold rounded-xl transition text-white"
-          >
-            Débloquer l'accès (Premium)
-          </button>
-          <p className="text-xs text-zinc-500 mt-4">
-            Déjà client ? Connecte-toi ou vérifie ton compte.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // CODE NORMAL DE LA PAGE SI PREMIUM
-  return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-8 flex items-center justify-between border-b border-zinc-800 pb-4">
-          <div>
-            <h1 className="text-xl font-bold">DIAGNOSTIC MOTO / DIRT / MOTOCROSS</h1>
-            <p className="text-xs text-emerald-400 font-mono mt-1">✓ Accès Premium Débloqué</p>
-          </div>
-        </header>
-
-        {/* Le reste de ton application / questionnaire de diagnostic */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <p className="text-zinc-300">Bienvenue dans ton outil de diagnostic interactif.</p>
-          {/* Insère ici le rendu habituel de ton composant (step, questions, solutions) */}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const ENGINE_TYPES = [
   {
@@ -272,6 +196,12 @@ function youtubeSearch(query) {
 
 /* ============================================================
    SOLUTIONS
+   Chaque solution possède :
+   - un diagnostic
+   - un mini tutoriel
+   - outils
+   - sécurité
+   - lien YouTube remplaçable
 ============================================================ */
 
 const SOLUTIONS = {
@@ -494,7 +424,7 @@ const SOLUTIONS = {
 
   timing: {
     title: "Contrôler la distribution",
-    icon: "⛓️️",
+    icon: "⛓️",
     level: "Avancé",
     tools: "Clés moteur + manuel atelier",
     tutorial: [
@@ -639,7 +569,7 @@ const SOLUTIONS = {
 
   gearbox: {
     title: "Contrôler la boîte de vitesses",
-    icon: "⚙️️",
+    icon: "⚙️",
     level: "Avancé",
     tools: "Manuel atelier + outillage moteur",
     tutorial: [
@@ -819,7 +749,7 @@ const SOLUTIONS = {
 
   coolingFan: {
     title: "Contrôler ventilateur / température",
-    icon: "🌡️️",
+    icon: "🌡️",
     level: "Intermédiaire",
     tools: "Multimètre + manuel",
     tutorial: [
@@ -1310,7 +1240,7 @@ function buildQuestions(profile) {
 
     questions.push({
       id: "run_overheat",
-      icon: "🌡️️",
+      icon: "🌡️",
       title: "La moto chauffe-t-elle anormalement ?",
       choices: [
         {
@@ -1994,7 +1924,7 @@ function buildQuestions(profile) {
 
     questions.push({
       id: "chassis_chain",
-      icon: "⛓️️",
+      icon: "⛓️",
       title: "Chaîne et transmission finale sont-elles correctes ?",
       choices: [
         {
@@ -3208,59 +3138,47 @@ function buildSolutions(profile, answers) {
     if (answers.fuel_type === "efi") {
       add(
         "injector",
-        "Le système fonctionne par injection."
-      );
-
-      if (answers.fuel_pump === "no") {
-        add(
-          "fuelPump",
-          "La pompe à essence ne s'amorce pas."
-        );
-      }
-
-      if (answers.fuel_pump === "unknown") {
-        add(
-          "fuelPump",
-          "L'amorçage de la pompe n'a pas été vérifié."
-        );
-      }
-    }
-
-    if (answers.fuel_symptom === "rich") {
-      add(
-        "airFilter",
-        "Contrôle le filtre à air."
-      );
-      if (answers.fuel_type === "carb") {
-        add(
-          "carburetor",
-          "Contrôle le niveau de cuve, le pointeau et la taille des gicleurs."
-        );
-      }
-    }
-
-    if (answers.fuel_symptom === "lean") {
-      add(
-        "intakeLeak",
-        "Vérifie l'absence de prise d'air à l'admission."
+        "La moto est en injection."
       );
       add(
-        "fuelFlow",
-        "Vérifie que l'essence arrive en quantité suffisante."
+        "fuelPump",
+        "Pompe et alimentation doivent être contrôlées."
       );
     }
 
     if (answers.fuel_filter === "dirty") {
       add(
         "airFilter",
-        "Le filtre à air est sale."
+        "Le filtre à air est sale et peut modifier la carburation."
       );
     }
 
     if (answers.fuel_leak === "yes") {
       add(
         "fuelFlow",
-        "Une fuite de carburant a été repérée : sécurise le circuit."
+        "Une fuite d'essence doit être corrigée avant de continuer."
+      );
+    }
+
+    if (answers.fuel_symptom === "lean") {
+      add(
+        "intakeLeak",
+        "Une prise d'air fait partie des contrôles importants."
+      );
+      add(
+        "fuelFlow",
+        "Vérifie également que l'alimentation carburant ne manque pas."
+      );
+    }
+
+    if (answers.fuel_symptom === "rich") {
+      add(
+        "airFilter",
+        "Contrôle filtre à air et admission."
+      );
+      add(
+        "carburetor",
+        "Sur carburateur, vérifie starter, flotteur, pointeau et réglage."
       );
     }
   }
@@ -3270,45 +3188,51 @@ function buildSolutions(profile, answers) {
   */
 
   if (profile.symptom === "cooling") {
-    if (answers.cooling_level === "low" || answers.cooling_level === "empty") {
+    if (
+      answers.cooling_level === "low" ||
+      answers.cooling_level === "empty"
+    ) {
       add(
         "coolant",
-        "Le niveau de liquide de refroidissement est insuffisant."
+        "Le niveau de liquide est insuffisant."
       );
     }
 
     if (answers.cooling_leak === "yes") {
       add(
         "coolant",
-        "Une fuite sur le circuit de refroidissement a été détectée."
+        "Une fuite de liquide est signalée."
       );
     }
 
-    if (answers.cooling_radiator === "mud") {
+    if (
+      answers.cooling_radiator === "mud" ||
+      answers.cooling_radiator === "damaged"
+    ) {
       add(
         "coolant",
-        "Les radiateurs sont obstrués par de la terre ou de la boue."
-      );
-    }
-
-    if (answers.cooling_radiator === "damaged") {
-      add(
-        "coolant",
-        "Les ailettes du radiateur sont pliées, réduisant le flux d'air."
+        "La circulation d'air du radiateur peut être insuffisante."
       );
     }
 
     if (answers.cooling_fan === "yes_broken") {
       add(
         "coolingFan",
-        "Le ventilateur électrique ne se déclenche pas."
+        "Le ventilateur est présent mais ne fonctionne pas."
       );
     }
 
     if (answers.cooling_pump === "problem") {
       add(
         "coolant",
-        "Un problème au niveau de la pompe à eau ou de sa turbine a été identifié."
+        "Un problème de pompe à eau est signalé."
+      );
+    }
+
+    if (answers.cooling_pump === "unknown") {
+      add(
+        "coolant",
+        "La circulation du liquide n'a pas encore été vérifiée."
       );
     }
   }
@@ -3320,7 +3244,7 @@ function buildSolutions(profile, answers) {
   if (profile.symptom === "maintenance") {
     add(
       "maintenance",
-      "Effectue le contrôle général de sécurité et d'entretien."
+      "Le contrôle général est recommandé avant toute recherche plus poussée."
     );
 
     if (answers.maint_air === "no") {
@@ -3333,17 +3257,987 @@ function buildSolutions(profile, answers) {
     if (answers.maint_chain === "worn") {
       add(
         "chain",
-        "La transmission secondaire présente une usure."
+        "La transmission finale présente une usure."
       );
     }
 
     if (answers.maint_brakes === "worn") {
       add(
         "brakes",
-        "Les composants du freinage sont usés."
+        "Les freins sont à contrôler ou remplacer."
+      );
+    }
+
+    if (answers.maint_bolts === "no") {
+      add(
+        "maintenance",
+        "Une routine de contrôle des serrages est à mettre en place."
       );
     }
   }
 
-  return result;
+  /*
+    SOLUTIONS GÉNÉRIQUES SELON MOTEUR
+  */
+
+  if (profile.engine === "2t") {
+    if (
+      profile.symptom === "running" ||
+      profile.symptom === "starting"
+    ) {
+      if (!result.some((x) => x.id === "reeds")) {
+        add(
+          "reeds",
+          "Le contrôle des clapets est un point spécifique utile sur un 2T."
+        );
+      }
+    }
+  }
+
+  if (profile.engine === "4t") {
+    if (
+      profile.symptom === "running" ||
+      profile.symptom === "starting" ||
+      profile.symptom === "engine"
+    ) {
+      if (!result.some((x) => x.id === "valves")) {
+        add(
+          "valves",
+          "Sur un 4T, le jeu aux soupapes fait partie des contrôles moteur importants."
+        );
+      }
+    }
+  }
+
+  /*
+    DIRT / PIT
+  */
+
+  if (profile.family === "dirt") {
+    if (
+      profile.symptom === "starting" ||
+      profile.symptom === "running" ||
+      profile.symptom === "fuel"
+    ) {
+      if (!result.some((x) => x.id === "carburetor")) {
+        add(
+          "carburetor",
+          "Sur une Dirt/Pit, l'identification exacte du moteur et de son alimentation est importante avant de choisir un réglage."
+        );
+      }
+    }
+  }
+
+  /*
+    Si aucune solution précise n'est sortie,
+    on donne une base de contrôle.
+  */
+
+  if (result.length === 0) {
+    add(
+      "maintenance",
+      "Pas assez d'éléments pour isoler une panne précise : commence par le contrôle général."
+    );
+  }
+
+  return result.slice(0, 8);
+}
+
+/* ============================================================
+   CONTEXTE TECHNIQUE
+============================================================ */
+
+function getTechnicalContext(profile) {
+  const context = [];
+
+  if (profile.engine === "2t") {
+    context.push(
+      "2T : carburation, clapets, étanchéité, compression, allumage et valve d'échappement selon le moteur."
+    );
+  }
+
+  if (profile.engine === "4t") {
+    context.push(
+      "4T : alimentation, allumage, soupapes, distribution, compression et décompression selon le moteur."
+    );
+  }
+
+  if (profile.family === "dirt") {
+    context.push(
+      "Dirt/Pit : ne pas déduire les pièces uniquement à partir de la cylindrée. Identifier le modèle et idéalement la famille moteur."
+    );
+  }
+
+  if (profile.displacement === "250") {
+    context.push(
+      "250 cc : cette cylindrée existe dans plusieurs architectures très différentes ; le modèle exact et l'année sont importants."
+    );
+  }
+
+  if (profile.displacement === "190") {
+    context.push(
+      "190 cc : plusieurs moteurs et configurations existent dans le monde Dirt/Pit ; vérifie la référence moteur avant de commander une pièce."
+    );
+  }
+
+  if (profile.model) {
+    context.push(
+      `Modèle déclaré : ${profile.model}. Les procédures exactes doivent être adaptées à ce modèle.`
+    );
+  }
+
+  return context;
+}
+
+/* ============================================================
+   UI
+============================================================ */
+
+function StepIndicator({ current, total }) {
+  return (
+    <div className="flex items-center gap-2">
+      {Array.from({ length: total }).map((_, index) => (
+        <div
+          key={index}
+          className={`h-1.5 rounded-full transition-all ${
+            index <= current ? "bg-orange-500 flex-1" : "bg-zinc-800 flex-1"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ChoiceCard({ choice, selected, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full text-left rounded-2xl border p-4 transition-all duration-200 ${
+        selected
+          ? "border-orange-500 bg-orange-500/10 shadow-[0_0_30px_rgba(249,115,22,0.08)]"
+          : "border-zinc-800 bg-zinc-900/70 hover:border-zinc-700 hover:bg-zinc-900"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <div className="font-semibold text-zinc-100">{choice.label}</div>
+          {choice.hint && (
+            <div className="text-sm text-zinc-500 mt-1">{choice.hint}</div>
+          )}
+        </div>
+
+        <div
+          className={`h-5 w-5 rounded-full border flex items-center justify-center ${
+            selected
+              ? "border-orange-500 bg-orange-500"
+              : "border-zinc-700"
+          }`}
+        >
+          {selected && (
+            <div className="h-2 w-2 rounded-full bg-white" />
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function SolutionCard({ solution, index }) {
+  return (
+    <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 overflow-hidden">
+      <div className="p-5 border-b border-zinc-800">
+        <div className="flex items-start gap-4">
+          <div className="h-11 w-11 shrink-0 rounded-2xl bg-orange-500/10 flex items-center justify-center text-xl">
+            {solution.icon}
+          </div>
+
+          <div className="flex-1">
+            <div className="text-xs uppercase tracking-wider text-orange-400 font-bold">
+              Piste {index + 1} · {solution.level}
+            </div>
+
+            <h3 className="text-lg font-bold mt-1 text-white">
+              {solution.title}
+            </h3>
+
+            <p className="text-sm text-zinc-400 mt-2">
+              {solution.reason}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-5">
+        <div>
+          <div className="text-sm font-semibold text-zinc-200 mb-3">
+            🛠️ Petit tutoriel
+          </div>
+
+          <ol className="space-y-2">
+            {solution.tutorial.map((step, i) => (
+              <li
+                key={i}
+                className="flex gap-3 text-sm text-zinc-400"
+              >
+                <span className="shrink-0 h-6 w-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs text-orange-400">
+                  {i + 1}
+                </span>
+
+                <span className="pt-0.5">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="rounded-2xl bg-zinc-900/80 border border-zinc-800 p-4">
+          <div className="text-sm font-semibold text-zinc-200">
+            🧰 Outils
+          </div>
+          <div className="text-sm text-zinc-500 mt-1">
+            {solution.tools}
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-red-500/5 border border-red-500/10 p-4">
+          <div className="text-sm font-semibold text-red-300">
+            ⚠️ Attention
+          </div>
+          <div className="text-sm text-zinc-500 mt-1">
+            {solution.safety}
+          </div>
+        </div>
+
+        <a
+          href={youtubeSearch(solution.videoQuery)}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-between gap-4 rounded-2xl bg-red-600/10 border border-red-500/20 px-4 py-3 hover:bg-red-600/15 transition-colors"
+        >
+          <div>
+            <div className="text-sm font-semibold text-red-300">
+              ▶️ Tutoriel vidéo YouTube
+            </div>
+            <div className="text-xs text-zinc-500 mt-1">
+              Lien de recherche à remplacer par ta propre vidéo
+            </div>
+          </div>
+
+          <span className="text-red-400">↗</span>
+        </a>
+      </div>
+    </div>
+  );
+}
+
+export default function AssistancePage() {
+  const [stage, setStage] = useState("profile");
+  const [profileStep, setProfileStep] = useState(0);
+
+  const [profile, setProfile] = useState({
+    engine: "",
+    family: "",
+    displacement: "",
+    model: "",
+    year: "",
+    fuelSystem: "",
+    symptom: "",
+  });
+
+  const [answers, setAnswers] = useState({});
+  const [answerOrder, setAnswerOrder] = useState([]);
+
+  const questions = useMemo(
+    () => buildQuestions(profile),
+    [profile]
+  );
+
+  const activeQuestions = useMemo(
+    () =>
+      questions.filter(
+        (question) =>
+          !question.when || question.when(answers)
+      ),
+    [questions, answers]
+  );
+
+  const currentQuestion = activeQuestions.find(
+    (question) => answers[question.id] === undefined
+  );
+
+  const currentQuestionIndex = activeQuestions.findIndex(
+    (question) => answers[question.id] === undefined
+  );
+
+  const solutions = useMemo(
+    () => buildSolutions(profile, answers),
+    [profile, answers]
+  );
+
+  const technicalContext = useMemo(
+    () => getTechnicalContext(profile),
+    [profile]
+  );
+
+  const finished =
+    stage === "diagnostic" && !currentQuestion;
+
+  const profileLabel = [
+    profile.engine?.toUpperCase(),
+    profile.family === "dirt"
+      ? "DIRT / PIT"
+      : profile.family === "mx"
+      ? "MX / ENDURO"
+      : profile.family,
+    profile.displacement
+      ? `${profile.displacement} CC`
+      : null,
+    profile.model || null,
+    profile.year || null,
+  ]
+    .filter(Boolean)
+    .join(" • ");
+
+  function updateProfile(key, value) {
+    setProfile((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  }
+
+  function nextProfileStep() {
+    if (profileStep < 4) {
+      setProfileStep((prev) => prev + 1);
+      return;
+    }
+
+    setAnswers({});
+    setAnswerOrder([]);
+    setStage("diagnostic");
+  }
+
+  function previousProfileStep() {
+    if (profileStep === 0) return;
+    setProfileStep((prev) => prev - 1);
+  }
+
+  function chooseAnswer(value) {
+    if (!currentQuestion) return;
+
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion.id]: value,
+    }));
+
+    setAnswerOrder((prev) => [
+      ...prev.filter((id) => id !== currentQuestion.id),
+      currentQuestion.id,
+    ]);
+  }
+
+  function goBackDiagnostic() {
+    if (answerOrder.length === 0) {
+      setStage("profile");
+      setProfileStep(4);
+      return;
+    }
+
+    const lastQuestionId =
+      answerOrder[answerOrder.length - 1];
+
+    setAnswers((prev) => {
+      const copy = { ...prev };
+      delete copy[lastQuestionId];
+      return copy;
+    });
+
+    setAnswerOrder((prev) => prev.slice(0, -1));
+  }
+
+  function restart() {
+    setStage("profile");
+    setProfileStep(0);
+    setAnswers({});
+    setAnswerOrder([]);
+
+    setProfile({
+      engine: "",
+      family: "",
+      displacement: "",
+      model: "",
+      year: "",
+      fuelSystem: "",
+      symptom: "",
+    });
+  }
+
+  function changeBike() {
+    setStage("profile");
+    setProfileStep(0);
+    setAnswers({});
+    setAnswerOrder([]);
+  }
+
+  function selectSymptom(id) {
+    updateProfile("symptom", id);
+    setAnswers({});
+    setAnswerOrder([]);
+  }
+
+  const canContinue =
+    (profileStep === 0 && profile.engine) ||
+    (profileStep === 1 && profile.family) ||
+    (profileStep === 2 &&
+      profile.displacement) ||
+    (profileStep === 3) ||
+    (profileStep === 4 && profile.symptom);
+
+  const modelSuggestions =
+    profile.family === "dirt"
+      ? DIRT_MODEL_SUGGESTIONS
+      : MX_MODEL_SUGGESTIONS;
+
+  return (
+    <main className="min-h-screen bg-[#070709] text-zinc-100 px-4 py-6 sm:px-6 lg:px-8 pb-24">
+      <div className="max-w-3xl mx-auto">
+
+        {/* HEADER */}
+        <header className="mb-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-400">
+                🛠️ ATELIER DIAGNOSTIC
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight mt-3">
+                Trouve la panne
+              </h1>
+
+              <p className="text-zinc-500 mt-2">
+                Un diagnostic guidé adapté à ton moteur et à ta moto.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={restart}
+              className="shrink-0 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-400 hover:text-white"
+            >
+              Recommencer
+            </button>
+          </div>
+        </header>
+
+        {/* PROFIL */}
+        {stage === "profile" && (
+          <section className="space-y-5">
+
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <div className="text-xs uppercase tracking-widest text-orange-400 font-bold">
+                    Profil de la moto
+                  </div>
+
+                  <div className="text-sm text-zinc-500 mt-1">
+                    Étape {profileStep + 1} / 5
+                  </div>
+                </div>
+              </div>
+
+              <StepIndicator current={profileStep} total={5} />
+            </div>
+
+            {/* ETAPE 1 */}
+            {profileStep === 0 && (
+              <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-7">
+                <div className="text-sm text-orange-400 font-semibold mb-2">
+                  01 · Moteur
+                </div>
+
+                <h2 className="text-2xl font-bold">
+                  Ta moto est un 2T ou un 4T ?
+                </h2>
+
+                <p className="text-zinc-500 mt-2 mb-6">
+                  Ce choix change complètement les contrôles du diagnostic.
+                </p>
+
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {ENGINE_TYPES.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() =>
+                        updateProfile("engine", item.id)
+                      }
+                      className={`text-left rounded-2xl border p-5 transition-all ${
+                        profile.engine === item.id
+                          ? "border-orange-500 bg-orange-500/10"
+                          : "border-zinc-800 bg-zinc-950 hover:border-zinc-700"
+                      }`}
+                    >
+                      <div className="text-3xl mb-3">
+                        {item.icon}
+                      </div>
+
+                      <div className="font-black text-lg">
+                        {item.title}
+                      </div>
+
+                      <div className="text-sm text-zinc-500 mt-1">
+                        {item.description}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ETAPE 2 */}
+            {profileStep === 1 && (
+              <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-7">
+                <div className="text-sm text-orange-400 font-semibold mb-2">
+                  02 · Famille
+                </div>
+
+                <h2 className="text-2xl font-bold">
+                  Quel type de moto ?
+                </h2>
+
+                <p className="text-zinc-500 mt-2 mb-6">
+                  Une Dirt/Pit ne doit pas être diagnostiquée comme une
+                  motocross simplement parce qu'elle fait 125, 150 ou 190 cc.
+                </p>
+
+                <div className="space-y-3">
+                  {BIKE_FAMILIES.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() =>
+                        updateProfile("family", item.id)
+                      }
+                      className={`w-full text-left rounded-2xl border p-5 transition-all ${
+                        profile.family === item.id
+                          ? "border-orange-500 bg-orange-500/10"
+                          : "border-zinc-800 bg-zinc-950 hover:border-zinc-700"
+                      }`}
+                    >
+                      <div className="flex gap-4 items-center">
+                        <div className="text-3xl">
+                          {item.icon}
+                        </div>
+
+                        <div>
+                          <div className="font-bold text-lg">
+                            {item.title}
+                          </div>
+
+                          <div className="text-sm text-zinc-500 mt-1">
+                            {item.description}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ETAPE 3 */}
+            {profileStep === 2 && (
+              <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-7">
+                <div className="text-sm text-orange-400 font-semibold mb-2">
+                  03 · Cylindrée
+                </div>
+
+                <h2 className="text-2xl font-bold">
+                  Quelle est la gamme / cylindrée ?
+                </h2>
+
+                <p className="text-zinc-500 mt-2 mb-6">
+                  On garde toutes les cylindrées possibles pour éviter de
+                  faire croire qu'une marque ne fabrique pas un moteur qui
+                  existe chez un autre constructeur.
+                </p>
+
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {DISPLACEMENTS.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() =>
+                        updateProfile("displacement", size)
+                      }
+                      className={`rounded-xl border py-3 px-2 text-sm font-bold transition-all ${
+                        profile.displacement === size
+                          ? "border-orange-500 bg-orange-500 text-white"
+                          : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700"
+                      }`}
+                    >
+                      {size === "500+"
+                        ? "500+"
+                        : size === "Autre"
+                        ? "AUTRE"
+                        : `${size} cc`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ETAPE 4 */}
+            {profileStep === 3 && (
+              <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-7">
+                <div className="text-sm text-orange-400 font-semibold mb-2">
+                  04 · Identification
+                </div>
+
+                <h2 className="text-2xl font-bold">
+                  Quel est le modèle exact ?
+                </h2>
+
+                <p className="text-zinc-500 mt-2 mb-5">
+                  Plus tu renseignes précisément la moto, plus les pistes
+                  peuvent être adaptées. Pour une Dirt, indique idéalement
+                  aussi le moteur si tu le connais.
+                </p>
+
+                <input
+                  value={profile.model}
+                  onChange={(e) =>
+                    updateProfile("model", e.target.value)
+                  }
+                  placeholder={
+                    profile.family === "dirt"
+                      ? "Ex : YCF Factory 190, CRZ ERZ 250..."
+                      : "Ex : YZ 125, CRF 250R, YZ 250F..."
+                  }
+                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-4 outline-none focus:border-orange-500 transition-colors"
+                />
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {modelSuggestions.map((model) => (
+                    <button
+                      key={model}
+                      type="button"
+                      onClick={() =>
+                        updateProfile("model", model)
+                      }
+                      className={`rounded-full border px-3 py-2 text-xs transition-all ${
+                        profile.model === model
+                          ? "border-orange-500 bg-orange-500/10 text-orange-300"
+                          : "border-zinc-800 text-zinc-500 hover:text-white"
+                      }`}
+                    >
+                      {model}
+                    </button>
+                  ))}
+                </div>
+
+                {profile.family === "dirt" && (
+                  <div className="mt-6">
+                    <label className="text-sm text-zinc-400">
+                      Moteur exact si tu le connais
+                    </label>
+
+                    <input
+                      value={profile.fuelSystem}
+                      onChange={(e) =>
+                        updateProfile(
+                          "fuelSystem",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Ex : YX, Zongshen, Daytona, autre..."
+                      className="w-full mt-2 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-4 outline-none focus:border-orange-500"
+                    />
+                  </div>
+                )}
+
+                <div className="mt-6">
+                  <label className="text-sm text-zinc-400">
+                    Année
+                  </label>
+
+                  <input
+                    value={profile.year}
+                    onChange={(e) =>
+                      updateProfile("year", e.target.value)
+                    }
+                    placeholder="Ex : 2022"
+                    inputMode="numeric"
+                    className="w-full mt-2 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-4 outline-none focus:border-orange-500"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* ETAPE 5 */}
+            {profileStep === 4 && (
+              <div className="space-y-4">
+                <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-7">
+                  <div className="text-sm text-orange-400 font-semibold mb-2">
+                    05 · Symptôme
+                  </div>
+
+                  <h2 className="text-2xl font-bold">
+                    Qu'est-ce qui ne va pas ?
+                  </h2>
+
+                  <p className="text-zinc-500 mt-2">
+                    Je vais ensuite adapter les questions à ton moteur.
+                  </p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {SYMPTOMS.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => selectSymptom(item.id)}
+                      className={`text-left rounded-2xl border p-5 transition-all ${
+                        profile.symptom === item.id
+                          ? "border-orange-500 bg-orange-500/10"
+                          : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700"
+                      }`}
+                    >
+                      <div className="text-2xl">
+                        {item.icon}
+                      </div>
+
+                      <div className="font-bold mt-3">
+                        {item.title}
+                      </div>
+
+                      <div className="text-sm text-zinc-500 mt-1">
+                        {item.description}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* NAVIGATION PROFIL */}
+            <div className="flex gap-3">
+              {profileStep > 0 && (
+                <button
+                  type="button"
+                  onClick={previousProfileStep}
+                  className="rounded-2xl border border-zinc-800 px-5 py-3 text-zinc-400 hover:text-white"
+                >
+                  ← Retour
+                </button>
+              )}
+
+              <button
+                type="button"
+                disabled={!canContinue}
+                onClick={nextProfileStep}
+                className="flex-1 rounded-2xl bg-orange-500 px-5 py-3 font-bold text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-orange-400 transition-colors"
+              >
+                {profileStep === 4
+                  ? "Lancer le diagnostic →"
+                  : "Continuer →"}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* DIAGNOSTIC */}
+        {stage === "diagnostic" && !finished && (
+          <section className="space-y-5">
+
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-4">
+              <div className="flex flex-wrap gap-2">
+                {profileLabel.split(" • ").map((item, i) => (
+                  <span
+                    key={i}
+                    className="rounded-full bg-zinc-950 border border-zinc-800 px-3 py-1.5 text-xs text-zinc-400"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-7">
+
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div className="text-xs uppercase tracking-widest text-orange-400 font-bold">
+                  Question ciblée
+                </div>
+
+                <div className="text-xs text-zinc-600">
+                  {Math.max(currentQuestionIndex + 1, 1)} /{" "}
+                  {activeQuestions.length}
+                </div>
+              </div>
+
+              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-7">
+                <div
+                  className="h-full bg-orange-500 transition-all duration-300"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      ((currentQuestionIndex + 1) /
+                        Math.max(activeQuestions.length, 1)) *
+                        100
+                    )}%`,
+                  }}
+                />
+              </div>
+
+              <div className="text-4xl mb-4">
+                {currentQuestion.icon}
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-black">
+                {currentQuestion.title}
+              </h2>
+
+              {currentQuestion.description && (
+                <p className="text-zinc-500 mt-3 mb-6">
+                  {currentQuestion.description}
+                </p>
+              )}
+
+              <div className="space-y-3 mt-6">
+                {currentQuestion.choices.map((choice) => (
+                  <ChoiceCard
+                    key={choice.id}
+                    choice={choice}
+                    selected={
+                      answers[currentQuestion.id] ===
+                      choice.id
+                    }
+                    onClick={() =>
+                      chooseAnswer(choice.id)
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={goBackDiagnostic}
+                className="rounded-2xl border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm text-zinc-400 hover:text-white"
+              >
+                ← Question précédente
+              </button>
+
+              <button
+                type="button"
+                onClick={changeBike}
+                className="ml-auto rounded-2xl border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm text-zinc-400 hover:text-white"
+              >
+                Modifier la moto
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* RESULTAT */}
+        {finished && (
+          <section className="space-y-5">
+
+            <div className="rounded-3xl border border-orange-500/20 bg-orange-500/5 p-5 sm:p-7">
+              <div className="text-xs uppercase tracking-widest text-orange-400 font-bold">
+                Diagnostic terminé
+              </div>
+
+              <h2 className="text-3xl font-black mt-2">
+                Voici les contrôles à faire
+              </h2>
+
+              <div className="flex flex-wrap gap-2 mt-5">
+                {profileLabel.split(" • ").map((item, i) => (
+                  <span
+                    key={i}
+                    className="rounded-full bg-zinc-950/70 border border-zinc-800 px-3 py-1.5 text-xs text-zinc-400"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {technicalContext.length > 0 && (
+              <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5">
+                <div className="text-sm font-bold text-white">
+                  🧠 Pourquoi ces contrôles ?
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {technicalContext.map((text, i) => (
+                    <div
+                      key={i}
+                      className="text-sm text-zinc-500"
+                    >
+                      • {text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {solutions.map((solution, index) => (
+                <SolutionCard
+                  key={solution.id}
+                  solution={solution}
+                  index={index}
+                />
+              ))}
+            </div>
+
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-5">
+              <div className="font-bold">
+                🔎 Si aucune piste ne résout la panne
+              </div>
+
+              <div className="text-sm text-zinc-500 mt-2 leading-6">
+                Ne change pas plusieurs pièces au hasard. Reviens au trio
+                fondamental : <strong className="text-zinc-300">carburant</strong>,
+                <strong className="text-zinc-300"> allumage</strong> et
+                <strong className="text-zinc-300"> compression</strong>.
+                Sur un 4T, ajoute distribution/soupapes ; sur un 2T,
+                admission/clapets et étanchéité.
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={goBackDiagnostic}
+                className="rounded-2xl border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm text-zinc-400 hover:text-white"
+              >
+                ← Modifier ma dernière réponse
+              </button>
+
+              <button
+                type="button"
+                onClick={changeBike}
+                className="rounded-2xl border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm text-zinc-400 hover:text-white"
+              >
+                Modifier le profil
+              </button>
+
+              <button
+                type="button"
+                onClick={restart}
+                className="sm:ml-auto rounded-2xl bg-orange-500 px-5 py-3 text-sm font-bold hover:bg-orange-400"
+              >
+                Nouveau diagnostic
+              </button>
+            </div>
+          </section>
+        )}
+      </div>
+    </main>
+  );
 }
