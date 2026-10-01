@@ -14,6 +14,9 @@ export default function DashboardPage() {
   const [motoYear, setMotoYear] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Modale Upgrade
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
   // PWA Install prompt state
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
@@ -77,7 +80,6 @@ export default function DashboardPage() {
         setShowInstallBanner(false);
       }
     } else {
-      // Fallback si le navigateur ne déclenche pas l'événement automatique
       alert("Pour installer l'application, va dans le menu de ton navigateur (les 3 petits points) et sélectionne 'Ajouter à l'écran d'accueil' ou 'Installer l'application'.");
     }
   };
@@ -85,6 +87,16 @@ export default function DashboardPage() {
   const handleAddMoto = async (e) => {
     e.preventDefault();
     if (!motoBrand.trim() || !motoName.trim() || !motoYear.trim()) return;
+
+    const isPremium = localStorage.getItem("is_premium") === "true";
+    const MAX_FREE_MOTOS = 1;
+
+    // Si pas premium et qu'il a déjà 1 moto ou plus, on bloque et on ouvre la modale upgrade
+    if (!isPremium && motos.length >= MAX_FREE_MOTOS) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     setSubmitting(true);
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -224,6 +236,33 @@ export default function DashboardPage() {
 
       </div>
 
+      {/* Modal Upgrade si limite atteinte */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-[#121215] border border-orange-500/40 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl text-center">
+            <span className="text-[10px] font-mono font-bold tracking-widest text-orange-500 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full uppercase">
+              LIMITE ATTEINTE (1 MOTO MAX)
+            </span>
+            <h3 className="text-lg font-black text-white tracking-tight">Passez au Premium</h3>
+            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+              La version gratuite est limitée à l'enregistrement d'une seule moto. Débloquez l'ajout illimité de motos à vie pour <strong className="text-white">10 €</strong> sans abonnement.
+            </p>
+            <div className="pt-2 flex flex-col gap-2">
+              <Link className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-black font-mono text-xs font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 text-center" href="/upgrade">
+                DÉBLOQUER L'ILLIMITÉ (10 €)
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(false)}
+                className="w-full py-2 bg-zinc-900 text-zinc-400 hover:text-white font-mono text-xs rounded-xl transition-colors"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal d'explication pour iOS (Safari) */}
       {showIOSModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -238,7 +277,7 @@ export default function DashboardPage() {
               <ol className="list-decimal list-inside space-y-2 text-zinc-400">
                 <li>Ouvre cette page dans <strong className="text-white">Safari</strong>.</li>
                 <li>Appuie sur le bouton <strong className="text-orange-400">Partager</strong> en bas de l'écran (icône carré avec une flèche vers le haut).</li>
-                <li>Foule vers le bas et sélectionne <strong className="text-white">« Sur l'écran d'accueil »</strong>.</li>
+                <li>Fais défiler vers le bas et sélectionne <strong className="text-white">« Sur l'écran d'accueil »</strong>.</li>
                 <li>Appuie sur <strong className="text-white">Ajouter</strong> en haut à droite.</li>
               </ol>
             </div>

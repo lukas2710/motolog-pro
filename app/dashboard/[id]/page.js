@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
@@ -188,19 +188,7 @@ export default function MotoDetailPage({ params }) {
   return (
     <div className="min-h-screen bg-[#08080a] text-zinc-100 p-4 sm:p-6 pb-36 font-sans selection:bg-orange-500 selection:text-black">
       <div className="max-w-md md:max-w-xl mx-auto space-y-6">
-        
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 text-xs font-mono tracking-wider text-zinc-400 hover:text-white transition-colors"
-          >
-            ← GARAGE
-          </button>
-          
-          <Link className="text-xs font-mono font-semibold text-emerald-400 bg-emerald-950/30 border border-emerald-500/20 hover:border-emerald-500/40 px-3 py-1.5 rounded-xl transition-all" href={`/dashboard/${motoId}/costs`}>
-            📊 Dépenses
-          </Link>
-        </div>
+      
 
         <div className="relative overflow-hidden bg-gradient-to-br from-[#1c1815] via-[#12100e] to-[#0d0d0f] border border-orange-500/20 p-6 rounded-3xl shadow-2xl">
           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -303,7 +291,7 @@ export default function MotoDetailPage({ params }) {
                           </span>
                           <div>
                             <h3 className="font-bold text-xs tracking-wide text-zinc-100 uppercase">{part.name}</h3>
-                            <p className="text-[10px] font-mono text-zinc-400">{part.category || 'Général'} • Intervalle : {part.interval_hours}h</p>
+                            <p className="text-[10px] font-mono text-zinc-400">{part.category || 'Général'} — Intervalle : {part.interval_hours}h</p>
                           </div>
                         </div>
                       </div>
@@ -358,7 +346,6 @@ export default function MotoDetailPage({ params }) {
                 const remainingHours = (part.interval_hours - hoursUsed).toFixed(1);
                 const progress = Math.min((hoursUsed / part.interval_hours) * 100, 100);
 
-                // Couleur dynamique selon l'usure
                 let barColor = 'from-emerald-600 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.3)]';
                 let badgeClass = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
                 if (progress > 75) {
@@ -380,7 +367,7 @@ export default function MotoDetailPage({ params }) {
                           </span>
                           <div>
                             <h3 className="font-bold text-xs tracking-wide text-zinc-200 uppercase">{part.name}</h3>
-                            <p className="text-[10px] font-mono text-zinc-500">{part.category || 'Général'} • Intervalle : {part.interval_hours}h</p>
+                            <p className="text-[10px] font-mono text-zinc-500">{part.category || 'Général'} — Intervalle : {part.interval_hours}h</p>
                           </div>
                         </div>
                       </div>
@@ -453,7 +440,7 @@ export default function MotoDetailPage({ params }) {
                     <div>
                       <h4 className="text-xs font-semibold text-zinc-200">{log.title}</h4>
                       <p className="text-[10px] font-mono text-zinc-500">
-                        {new Date(log.performed_at).toLocaleDateString('fr-FR')} • {log.hours_at_done}h
+                        {new Date(log.performed_at).toLocaleDateString('fr-FR')} — {log.hours_at_done}h
                       </p>
                     </div>
                     <span className="text-xs font-mono font-bold text-orange-400">

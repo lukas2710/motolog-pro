@@ -27,12 +27,14 @@ export default function BottomNav() {
   const homeLink = activeMotoId ? `/dashboard/${activeMotoId}` : '/dashboard';
   const maintenanceLink = activeMotoId ? `/dashboard/${activeMotoId}/maintenance` : '/dashboard';
   const costsLink = activeMotoId ? `/dashboard/${activeMotoId}/costs` : '/dashboard';
+  const helpLink = '/aide';
   const accountLink = '/account';
 
   // Détection de la page active
   const isAccueilActive = activeMotoId && pathname === `/dashboard/${activeMotoId}`;
   const isMaintenanceActive = pathname.includes('/maintenance');
   const isCostsActive = pathname.includes('/costs');
+  const isHelpActive = pathname === '/aide';
   const isAccountActive = pathname === '/account' || pathname === '/dashboard';
 
   return (
@@ -70,6 +72,17 @@ export default function BottomNav() {
         >
           <span className="text-xl md:text-2xl">👛</span>
           <span className="text-[10px] md:text-xs tracking-tight mt-0.5 uppercase">Dépenses</span>
+        </Link>
+
+        {/* AIDE / PANNE */}
+        <Link
+          href={helpLink}
+          className={`flex flex-col items-center justify-center min-w-[55px] py-1 transition-all ${
+            isHelpActive ? 'text-orange-500 font-bold scale-105' : 'text-zinc-500 hover:text-zinc-300'
+          }`}
+        >
+          <span className="text-xl md:text-2xl">⚠️</span>
+          <span className="text-[10px] md:text-xs tracking-tight mt-0.5 uppercase">Panne</span>
         </Link>
 
         {/* MON COMPTE & VÉHICULES FUSIONNÉS */}

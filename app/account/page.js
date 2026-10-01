@@ -110,6 +110,16 @@ export default function AccountPage() {
           <span className="text-xs font-mono text-zinc-500">{user?.email}</span>
         </div>
 
+        {/* Bouton Mes motos */}
+        <div>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-xs font-bold rounded-xl transition-all border border-zinc-700 shadow-lg"
+          >
+            🏍️ MES MOTO
+          </button>
+        </div>
+
         {/* Statut du compte & Bouton de vérification */}
         <div className="bg-[#111114] border border-zinc-800/80 p-6 rounded-3xl space-y-4 shadow-2xl">
           <div className="flex justify-between items-center">
